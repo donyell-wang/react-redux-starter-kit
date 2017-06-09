@@ -1,4 +1,5 @@
 import { injectReducer } from '../../store/reducers'
+import { injectEpics } from '../../store/epics'
 
 export default (store) => ({
   path : 'counter',
@@ -10,10 +11,15 @@ export default (store) => ({
       /*  Webpack - use require callback to define
           dependencies for bundling   */
       const Counter = require('./containers/CounterContainer').default
-      const reducer = require('./modules/counter').default
+      const module = require('./modules/counter')
+      const reducer = module.default
+      const epics = module.epics
 
       /*  Add the reducer to the store on key 'counter'  */
       injectReducer(store, { key: 'counter', reducer })
+
+      /*  Adding new epics asynchronously  */
+      injectEpics(epics)
 
       /*  Return getComponent   */
       cb(null, Counter)

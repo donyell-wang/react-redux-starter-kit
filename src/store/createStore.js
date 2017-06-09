@@ -1,14 +1,15 @@
 import { applyMiddleware, compose, createStore as createReduxStore } from 'redux'
-import thunk from 'redux-thunk'
+import { createEpicMiddleware } from 'redux-observable'
 import { browserHistory } from 'react-router'
 import makeRootReducer from './reducers'
+import rootEpic from './epics'
 import { updateLocation } from './location'
 
 const createStore = (initialState = {}) => {
   // ======================================================
   // Middleware Configuration
   // ======================================================
-  const middleware = [thunk]
+  const epicMiddleware = createEpicMiddleware(rootEpic)
 
   // ======================================================
   // Store Enhancers
@@ -29,7 +30,7 @@ const createStore = (initialState = {}) => {
     makeRootReducer(),
     initialState,
     composeEnhancers(
-      applyMiddleware(...middleware),
+      applyMiddleware(epicMiddleware),
       ...enhancers
     )
   )

@@ -1,3 +1,7 @@
+import { combineEpics } from 'redux-observable'
+import 'rxjs/add/operator/delay'
+import 'rxjs/add/operator/map'
+
 // ------------------------------------
 // Constants
 // ------------------------------------
@@ -14,23 +18,21 @@ export function increment (value = 1) {
   }
 }
 
-/*  This is a thunk, meaning it is a function that immediately
-    returns a function for lazy evaluation. It is incredibly useful for
-    creating async actions, especially when combined with redux-thunk! */
-
-export const doubleAsync = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        dispatch({
-          type    : COUNTER_DOUBLE_ASYNC,
-          payload : getState().counter
-        })
-        resolve()
-      }, 200)
-    })
+export function doubleAsync () {
+  return {
+    type    : COUNTER_DOUBLE_ASYNC
   }
 }
+
+// ------------------------------------
+// Epics
+// ------------------------------------
+const doubleAsyncEpic = (action$, store) =>
+  action$.ofType(COUNTER_DOUBLE_ASYNC)
+    .delay(1000) // Asynchronously wait 1000ms then continue
+    .map(() => increment(store.getState().counter))
+
+export const epics = combineEpics(doubleAsyncEpic)
 
 export const actions = {
   increment,
@@ -41,8 +43,7 @@ export const actions = {
 // Action Handlers
 // ------------------------------------
 const ACTION_HANDLERS = {
-  [COUNTER_INCREMENT]    : (state, action) => state + action.payload,
-  [COUNTER_DOUBLE_ASYNC] : (state, action) => state * 2
+  [COUNTER_INCREMENT]    : (state, action) => state + action.payload
 }
 
 // ------------------------------------
